@@ -35,7 +35,7 @@ spec:
     value: 5d
   - name: build-platforms
     value:
-    - linux/x86_64
+    - linux/amd64
   - name: dockerfile
     value: runtimes/tensorflow/ubi9-python-3.12/Dockerfile.cuda
   - name: path-context
