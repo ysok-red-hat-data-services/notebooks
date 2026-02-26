@@ -726,7 +726,6 @@ podman build \
     -f codeserver/ubi9-python-3.12/Dockerfile.cpu \
     --platform linux/amd64 \
     -t code-server-test \
-    --build-arg ARCH=amd64 \
     --build-arg LOCAL_BUILD=true \
     --build-arg BASE_IMAGE=quay.io/opendatahub/odh-base-image-cpu-py312-c9s:latest \
     --build-arg PYLOCK_FLAVOR=cpu \

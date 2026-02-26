@@ -38,9 +38,6 @@ artifacts:
   - download_url: https://nodejs.org/download/release/v22.20.0/node-v22.20.0-linux-ppc64le.tar.gz
     checksum: sha256:f96e25a3ef6cbaa992c9bdccaf18684d12fbcbc9751bf0a85407715641f1930e
     filename: node-v22.20.0-linux-ppc64le.tar.gz
-  - download_url: https://playwright.azureedge.net/builds/chromium/1134/chromium-linux.zip
-    checksum: sha256:6f4bb701f2ad2d3a77ad5232f43ca719cd8ec7bc418a0a1f5f9495d8edfb953b
-    filename: chromium-1134-linux.zip
   - download_url: https://github.com/electron/electron/releases/download/v37.7.0/electron-v37.7.0-linux-x64.zip
     checksum: sha256:4ae04d20d0ea25bf3451e3d0eaa757190b5813fa58d17bbe3be4332836da6b25
     filename: electron-v37.7.0-linux-x64.zip
