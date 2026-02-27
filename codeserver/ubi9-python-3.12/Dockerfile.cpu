@@ -371,12 +371,12 @@ set -Eeuxo pipefail
 dnf install -y cpio
 dnf -y clean all
 cd /
-rpm2cpio "/tmp/code-server-${CODESERVER_VERSION/v/}-${TARGETARCH}.rpm" | cpio -idmv
+rpm2cpio /tmp/code-server-${CODESERVER_VERSION/v/}-*.rpm | cpio -idmv
 EOF
 
 COPY --chown=1001:0 ${CODESERVER_SOURCE_CODE}/utils utils/
 
-# Create and intall the extensions though build-time on a temporary directory. Later this directory will copied on the `/opt/app-root/src/.local/share/code-server/extensions` via run-code-server.sh file when it starts up.
+# Create and install the extensions at build-time in a temporary directory. Later this directory will be copied to `/opt/app-root/src/.local/share/code-server/extensions` via run-code-server.sh on startup.
 # https://coder.com/docs/code-server/FAQ#how-do-i-install-an-extension
 RUN /bin/bash <<'EOF'
 set -Eeuxo pipefail
@@ -535,4 +535,4 @@ python3 /tmp/test/test_startup.py 2>&1 | tee /tmp/test_log.txt
 EOF
 
 FROM codeserver
-COPY --from=tests /tmp/test_log.txt /tmp/test_log.txt
+COPY --from=tests /tmp/test_log.txt /dev/null

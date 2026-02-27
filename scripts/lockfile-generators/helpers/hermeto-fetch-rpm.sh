@@ -192,7 +192,11 @@ if [[ -n "$CDN_CERT_DIR" ]]; then
   C_KEY="/certs${CDN_KEY#"$CDN_CERT_DIR"}"
   C_CA="/certs${CDN_CA#"$CDN_CERT_DIR"}"
 
-  HERMETO_JSON="{\"type\": \"rpm\", \"options\": {\"ssl\": {\"client_cert\": \"$C_CERT\", \"client_key\": \"$C_KEY\", \"ca_bundle\": \"$C_CA\"}}}"
+  HERMETO_JSON=$(jq -n \
+    --arg cert "$C_CERT" \
+    --arg key  "$C_KEY" \
+    --arg ca   "$C_CA" \
+    '{"type":"rpm","options":{"ssl":{"client_cert":$cert,"client_key":$key,"ca_bundle":$ca}}}')
 fi
 
 # =========================================================================

@@ -98,7 +98,11 @@ if [[ "$ARCH" == "amd64" || "$ARCH" == "arm64" || "$ARCH" == "ppc64le" || "$ARCH
     fi
 
     # apply code-server's own patches to VS Code source
-    while IFS= read -r src_patch || [[ -n "$src_patch" ]]; do echo "patches/$src_patch"; patch -p1 < "patches/$src_patch"; done < patches/series
+    while IFS= read -r src_patch || [[ -n "$src_patch" ]]; do
+        [[ -z "$src_patch" ]] && continue
+        echo "patches/$src_patch"
+        patch -p1 < "patches/$src_patch"
+    done < patches/series
     npm cache clean --force
 
     # GitHub Actions runners (16GB RAM) need reduced build parallelism.

@@ -19,7 +19,7 @@
     "ts-jest": "^27.0.7",
     "wtfnode": "^0.9.1"
   },
-  "resolutions": {
+  "overrides": {
     "ansi-regex": "^5.0.1",
     "argon2/@mapbox/node-pre-gyp/tar": "^6.1.9",
     "set-value": "^4.0.1",

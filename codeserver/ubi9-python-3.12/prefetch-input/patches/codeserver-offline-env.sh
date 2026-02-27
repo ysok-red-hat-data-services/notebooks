@@ -32,7 +32,7 @@ export NPM_CONFIG_NODEDIR=/usr
 export npm_config_nodedir=/usr
 # Playwright: skip browser download during npm ci (Playwright is a devDep but
 # only used for tests, not the build; chromium binary is not prefetched)
-export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
+export PLAYWRIGHT_BROWSERS_PATH="${HOME}/.cache/ms-playwright"
 export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 export PLAYWRIGHT_SKIP_FFMPEG_INSTALL=1
 # VSCODE_OFFLINE_CACHE: used by the patched fetch.js (patches/code-server-v4.106.3/lib/vscode/build/lib/fetch.js)
