@@ -94,6 +94,8 @@ COPY ${CODESERVER_CONTEXT}/prefetch-input/patches/setup-offline-binaries.sh ${CO
 COPY ${CODESERVER_CONTEXT}/prefetch-input/patches/codeserver-offline-env.sh ${CODESERVER_SOURCE_CODE}/patches/
 COPY ${CODESERVER_CONTEXT}/prefetch-input/patches/tweak-gha.sh ${CODESERVER_SOURCE_CODE}/patches/
 COPY ${CODESERVER_CONTEXT}/prefetch-input/patches/apply-patch.sh ${CODESERVER_SOURCE_CODE}/
+# [HERMETIC] utils/ contains git-tracked .vsix (built-in extensions + Python/Jupyter); used by setup-offline-binaries.sh and final stage.
+COPY ${CODESERVER_CONTEXT}/utils/ ${CODESERVER_SOURCE_CODE}/utils/
 
 # [HERMETIC] apply-patch.sh enables gcc-toolset-14 and applies patches (ripgrep, vsce-sign,
 # patches/series). npm ci, build, and release run in separate RUN steps below for caching.
@@ -103,7 +105,7 @@ RUN cd ${CODESERVER_SOURCE_CODE} && GHA_BUILD="${GHA_BUILD}" ./apply-patch.sh
 # setup-offline-binaries.sh does all offline preparation in one shot:
 #   - sources codeserver-offline-env.sh (ELECTRON_SKIP_BINARY_DOWNLOAD, NPM_CONFIG_NODEDIR, etc.)
 #   - node-gyp uses system headers (NPM_CONFIG_NODEDIR=/usr from nodejs-devel RPM)
-#   - ripgrep, .vsix extensions from cachi2 generic; .build/node/ = system /usr/bin/node (per-arch)
+#   - ripgrep from cachi2 generic; .vsix from utils/; .build/node/ = system /usr/bin/node (per-arch)
 #   - pre-populates .build/builtInExtensions/ so gulp skips network downloads
 #   - rewrites package-lock.json "resolved" URLs to file:///cachi2/...
 # CI=1 makes ci/dev/postinstall.sh run "npm ci" (not "npm install") in subdirs,
