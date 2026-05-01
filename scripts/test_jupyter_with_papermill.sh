@@ -254,15 +254,19 @@ function _get_package_version_from_requirements()
 #	Each test suite that asserts against package versions must include necessary logic to honor this file.
 #
 # Arguments:
-#   $1 : Name of the notebook identifier
+#   $1 : Name of the notebook identifier (which test_notebook.ipynb is running)
+#   $2 : [optional] Notebook id whose imagestream supplies package version annotations
+#        (defaults to $1; use the workload image e.g. pytorch when running inherited
+#        minimal/datascience papermill suites so pins match cuda/rocm lockfiles)
 function _create_test_versions_source_of_truth()
 {
     local notebook_id="${1:-}"
+    local versions_source_notebook_id="${2:-${notebook_id}}"
 
     local version_filename='expected_versions.json'
 
     local test_version_truth_filepath=
-    test_version_truth_filepath="$( _get_source_of_truth_filepath "${notebook_id}" )" || true
+    test_version_truth_filepath="$( _get_source_of_truth_filepath "${versions_source_notebook_id}" )" || true
     if ! [ -e "${test_version_truth_filepath}" ]; then
         printf '%s\n' "Imagestream manifest not found at: ${test_version_truth_filepath}. Check manifests/odh/base for the correct path."
         exit 1
@@ -314,12 +318,14 @@ function _create_test_versions_source_of_truth()
 #
 # Arguments:
 #   $1 : Name of the notebook identifier
+#   $2 : [optional] Notebook id for imagestream-backed expected_versions (see _create_test_versions_source_of_truth)
 function _run_test()
 {
     local notebook_id="${1:-}"
+    local versions_source_notebook_id="${2:-${notebook_id}}"
 
     # Create expected_versions.json from the correct imagestream for THIS test
-    _create_test_versions_source_of_truth "${notebook_id}"
+    _create_test_versions_source_of_truth "${notebook_id}" "${versions_source_notebook_id}"
 
     local test_notebook_file='test_notebook.ipynb'
     local repo_test_directory=
@@ -379,10 +385,14 @@ function _image_derived_from_datascience()
 
 # Description:
 #	Convenience function that will invoke the minimal and datascience papermill tests against the running notebook workload
+#
+# Arguments:
+#   $1 : Notebook id of the workload image (pytorch, tensorflow, datascience, …) used to resolve expected_versions.json
 function _test_datascience_notebook()
 {
-    _run_test "${jupyter_minimal_notebook_id}"
-    _run_test "${jupyter_datascience_notebook_id}"
+    local versions_source_notebook_id="${1:-}"
+    _run_test "${jupyter_minimal_notebook_id}" "${versions_source_notebook_id}"
+    _run_test "${jupyter_datascience_notebook_id}" "${versions_source_notebook_id}"
 }
 
 function _get_notebook_id() {
@@ -435,7 +445,7 @@ function _handle_test()
     "${kbin}" exec "${notebook_workload_name}" -- /bin/sh -c "python3 -m pip install papermill"
 
     if _image_derived_from_datascience "${notebook_id}" ; then
-        _test_datascience_notebook
+        _test_datascience_notebook "${notebook_id}"
     fi
 
     if [ -n "${notebook_id}" ] && ! [ "${notebook_id}" = "${jupyter_datascience_notebook_id}" ]; then
