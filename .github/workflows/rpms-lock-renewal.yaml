@@ -157,6 +157,12 @@ jobs:
           git commit -m "Update ${VARIANT_UPPER} rpms.lock.yaml lock files"
           git push -u "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "$BRANCH_NAME"
 
+          # gh pr create fails if the label does not exist yet (see automated-lockfile-update).
+          gh label create "automated-rpms-lockfile-update" \
+            --description "Auto-created RPM lockfile update PR" \
+            --color "0E8A16" \
+            2>/dev/null || true
+
           gh pr create \
             --title "Update ${VARIANT_UPPER} rpms.lock.yaml lock files" \
             --head "$BRANCH_NAME" \
