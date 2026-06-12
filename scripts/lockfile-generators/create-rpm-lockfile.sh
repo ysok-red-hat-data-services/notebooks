@@ -132,13 +132,14 @@ fi
 
 # Second run rpm-lockfile-prototype to generate the lockfile
 echo "--- Generating Lockfile using rpm-lockfile-prototype --"
-TTY_FLAG=""
-[ -t 1 ] && TTY_FLAG="-t"
-podman run --rm -i $TTY_FLAG \
+podman_run_args=(--rm -i)
+[[ -t 1 ]] && podman_run_args+=(-t)
+podman run "${podman_run_args[@]}" \
     -v "$(pwd):/workspace" \
     --platform linux/x86_64 \
+    -w "/workspace/${SCRIPTS_PATH}" \
     localhost/notebook-rpm-lockfile:latest \
-    sh -c "cd /workspace/$SCRIPTS_PATH && ./helpers/rpm-lockfile-generate.sh prefetch-input=$PREFETCH_DIR"
+    ./helpers/rpm-lockfile-generate.sh "prefetch-input=${PREFETCH_DIR}"
 
 # Download RPMs and create repository metadata (for dnf)
 if [[ "$DO_DOWNLOAD" == true ]]; then
