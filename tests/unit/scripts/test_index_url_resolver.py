@@ -29,6 +29,58 @@ def test_index_url_candidates_use_prod_then_test_suffix() -> None:
     )
 
 
+def test_resolve_rhoai_cpu_index_from_flavor_specific_base_image_key(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    conf_file = write_conf(
+        tmp_path,
+        "konflux.cpu.conf",
+        [
+            "BASE_IMAGE_CPU=quay.io/aipcc/base-images/cpu:3.5.0-ea.2-1778762488",
+            "PYLOCK_FLAVOR=cpu",
+            "PRODUCT=rhoai",
+        ],
+    )
+    monkeypatch.setattr(
+        resolver,
+        "index_url_exists",
+        lambda url: url == prod_index_url(release="3.5-EA2", accelerator="cpu"),
+    )
+
+    resolved = resolver.resolve_index_config(conf_file)
+
+    assert resolved.flavor == "cpu"
+    assert resolved.base_image == "quay.io/aipcc/base-images/cpu:3.5.0-ea.2-1778762488"
+    assert resolved.index_url == "https://packages.redhat.com/api/pypi/public-rhai/rhoai/3.5-EA2/cpu-ubi9/simple/"
+
+
+def test_resolve_rhoai_cuda_index_from_flavor_specific_base_image_key(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    conf_file = write_conf(
+        tmp_path,
+        "konflux.cuda.conf",
+        [
+            "BASE_IMAGE_CUDA=quay.io/aipcc/base-images/cuda-13.0-el9.6:3.5.0-ea.2-1778760737",
+            "PYLOCK_FLAVOR=cuda",
+            "PRODUCT=rhoai",
+        ],
+    )
+    monkeypatch.setattr(
+        resolver,
+        "index_url_exists",
+        lambda url: url == prod_index_url(release="3.5-EA2", accelerator="cuda13.0"),
+    )
+
+    resolved = resolver.resolve_index_config(conf_file)
+
+    assert resolved.flavor == "cuda"
+    assert resolved.accelerator == "cuda13.0"
+    assert resolved.index_url == "https://packages.redhat.com/api/pypi/public-rhai/rhoai/3.5-EA2/cuda13.0-ubi9/simple/"
+
+
 def test_resolve_rhoai_cpu_index_from_konflux_conf(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

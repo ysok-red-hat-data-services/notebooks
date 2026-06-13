@@ -80,6 +80,20 @@ def resolve_flavor(conf_file: Path, entries: dict[str, str]) -> str:
     return stem
 
 
+def resolve_base_image(conf_file: Path, entries: dict[str, str]) -> str:
+    """Resolve the base image from legacy or flavor-specific build-arg keys."""
+    if base_image := entries.get("BASE_IMAGE"):
+        return base_image
+
+    flavor = resolve_flavor(conf_file, entries)
+    if base_image := entries.get(f"BASE_IMAGE_{flavor.upper()}"):
+        return base_image
+
+    raise IndexResolutionError(
+        f"BASE_IMAGE (or BASE_IMAGE_{flavor.upper()}) is missing in {conf_file}"
+    )
+
+
 def parse_accelerator(image_name: str, conf_file: Path) -> str:
     for pattern, prefix in _ACCELERATOR_PATTERNS:
         match = pattern.fullmatch(image_name)
@@ -161,9 +175,7 @@ def resolve_index_config(
     if product != "rhoai":
         raise IndexResolutionError(f"Unsupported PRODUCT for dynamic RH index resolution in {conf_file}: {product}")
 
-    base_image = entries.get("BASE_IMAGE")
-    if not base_image:
-        raise IndexResolutionError(f"BASE_IMAGE is missing in {conf_file}")
+    base_image = resolve_base_image(conf_file, entries)
 
     match = _BASE_IMAGE_RE.fullmatch(base_image)
     if match is None:
