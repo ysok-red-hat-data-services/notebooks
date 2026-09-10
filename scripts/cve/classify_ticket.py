@@ -20,7 +20,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from scripts.cve import extract_cve_id
 from scripts.cve.jira_client import JiraClient
 
 PACKAGE_TYPES = ("python", "rpm", "go", "java", "npm", "unknown")
@@ -265,9 +264,7 @@ def classify_package_type(issue: dict[str, Any]) -> str:
     if any(hint in text for hint in NPM_PACKAGE_HINTS):
         return "npm"
 
-    if _extract_python_package(summary) or (
-        extract_cve_id(summary) and not GO_MODULE_RE.search(summary) and not RPM_NEVRA_RE.search(summary)
-    ):
+    if _extract_python_package(summary):
         return "python"
 
     return "unknown"
@@ -340,6 +337,14 @@ def classify_ticket(issue: dict[str, Any]) -> Classification:
     labels = _labels(issue)
     description = _description(issue)
 
+    package = _extract_package_name(summary, package_type)
+    branch = _extract_branch(summary, description)
+
+    if action == "autofix" and (not package or not branch):
+        action = "needs_info"
+        verdict = "needs_info"
+        reason = "Missing package or branch — cannot group for autofix."
+
     return Classification(
         issue_key=issue_key,
         package_type=package_type,
@@ -347,8 +352,8 @@ def classify_ticket(issue: dict[str, Any]) -> Classification:
         action=action,
         verdict=verdict,
         reason=reason,
-        package=_extract_package_name(summary, package_type),
-        branch=_extract_branch(summary, description),
+        package=package,
+        branch=branch,
         cve_ids=_extract_cve_ids(summary, description, labels),
     )
 
@@ -362,12 +367,15 @@ def _issue_from_args(args: argparse.Namespace) -> dict[str, Any]:
         raise SystemExit("issue key or --issue-json is required")
 
     # Offline replay: minimal fixture lookup for local tests without Jira.
-    fixture_path = args.fixture_dir / f"{args.issue_key}.json"
+    fixture_root = args.fixture_dir.resolve()
+    fixture_path = (fixture_root / f"{args.issue_key}.json").resolve()
+    if fixture_path.parent != fixture_root:
+        raise SystemExit("issue key must resolve to a direct fixture file")
     if fixture_path.is_file():
         with open(fixture_path, encoding="utf-8") as handle:
             return json.load(handle)
 
-    client = JiraClient()
+    client = JiraClient.from_env()
     return client.get_issue(
         args.issue_key,
         "summary,description,labels,issuetype,issuelinks,project",

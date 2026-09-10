@@ -61,6 +61,62 @@ def test_java_rhaieng_parent_not_fixable() -> None:
     assert result.verdict == "not_fixable"
 
 
+def test_npm_rhaieng_parent_not_fixable() -> None:
+    result = classify_ticket(_load_fixture("RHAIENG-6810"))
+    assert result.package_type == "npm"
+    assert result.ticket_role == "rhaieng_parent"
+    assert result.action == "skip"
+    assert result.verdict == "not_fixable"
+    assert result.package == "code-server"
+
+
+def test_openssl_not_classified_as_python() -> None:
+    issue = {
+        "key": "RHAIENG-9999",
+        "fields": {
+            "project": {"key": "RHAIENG"},
+            "summary": "CVE-2026-1234 openssl [rhoai-3.4]",
+            "description": "Tracker for openssl CVE.\n\n**Blocked Issues (1):** RHOAIENG-99999",
+            "labels": ["CVE", "CVE-2026-1234", "security"],
+            "issuetype": {"name": "Bug"},
+            "issuelinks": [
+                {
+                    "type": {"name": "Blocks"},
+                    "outwardIssue": {"key": "RHOAIENG-99999"},
+                }
+            ],
+        },
+    }
+    result = classify_ticket(issue)
+    assert result.package_type == "unknown"
+    assert result.action == "needs_info"
+    assert result.verdict == "needs_info"
+
+
+def test_autofix_without_branch_needs_info() -> None:
+    issue = {
+        "key": "RHAIENG-9998",
+        "fields": {
+            "project": {"key": "RHAIENG"},
+            "summary": "CVE-2026-9999 Requests: example vulnerability",
+            "description": "Tracker without branch suffix.\n\n**Blocked Issues (1):** RHOAIENG-99998",
+            "labels": ["CVE", "security"],
+            "issuetype": {"name": "Bug"},
+            "issuelinks": [
+                {
+                    "type": {"name": "Blocks"},
+                    "outwardIssue": {"key": "RHOAIENG-99998"},
+                }
+            ],
+        },
+    }
+    result = classify_ticket(issue)
+    assert result.package_type == "python"
+    assert result.action == "needs_info"
+    assert result.verdict == "needs_info"
+    assert result.branch is None
+
+
 def test_epic_scenarios(subtests: Subtests) -> None:
     """Cover all six epic test-plan scenarios via fixtures."""
     scenarios = {
@@ -69,6 +125,7 @@ def test_epic_scenarios(subtests: Subtests) -> None:
         "nginx rpm rhsa path": ("RHAIENG-6699", "rpm_check"),
         "docker go not_fixable": ("RHAIENG-6695", "skip"),
         "jackson java not_fixable": ("RHAIENG-6792", "skip"),
+        "code-server npm not_fixable": ("RHAIENG-6810", "skip"),
     }
     for name, (key, expected_action) in scenarios.items():
         with subtests.test(msg=name):
