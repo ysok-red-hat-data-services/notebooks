@@ -145,7 +145,7 @@ $(eval _YUM_REPOS_D_SRC := $(if $(_CACHI2_OUTPUT),$(_CACHI2_OUTPUT)/deps/rpm/$(R
 	trap cleanup EXIT; \
 	if [ -n '$(_CACHI2_OUTPUT)' ]; then \
 	  rm -f '$(_YUM_REPOS_D_SRC)/redhat.repo'; \
-	  YUM_REPOS_CLEAN=$$(mktemp -d); \
+	  YUM_REPOS_CLEAN=$$(mktemp -d '$(ROOT_DIR).yum-repos-clean.XXXXXX'); \
 	  find '$(_YUM_REPOS_D_SRC)' -maxdepth 1 -type f -name '*.repo' ! -name 'redhat.repo' \
 	    -exec cp -a {} "$${YUM_REPOS_CLEAN}/" \; ; \
 	  if [ -z "$$(find "$${YUM_REPOS_CLEAN}" -maxdepth 1 -type f -name '*.repo' -print -quit)" ]; then \
