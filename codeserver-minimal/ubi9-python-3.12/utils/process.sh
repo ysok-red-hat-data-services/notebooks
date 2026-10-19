@@ -15,5 +15,5 @@ function start_process() {
 }
 
 function stop_process() {
-    kill -TERM $PID
+    kill -TERM "$PID"
 }

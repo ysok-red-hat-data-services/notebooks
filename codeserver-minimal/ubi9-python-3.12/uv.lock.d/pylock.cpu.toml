@@ -620,9 +620,9 @@ wheels = [{ url = "https://packages.redhat.com/api/pulp-content/public-rhai/cpu-
 
 [[packages]]
 name = "urllib3"
-version = "2.7.0"
+version = "2.8.0"
 marker = "python_full_version == '3.12.*' and implementation_name == 'cpython' and sys_platform == 'linux'"
-wheels = [{ url = "https://packages.redhat.com/api/pulp-content/public-rhai/cpu-torch2.13-el9.8-test/urllib3-2.7.0-1-py3-none-any.whl", upload-time = 2026-09-25T17:10:50Z, size = 132762, hashes = { sha256 = "74da65bbe2a901ff75d9f311b70c3476d0b2257c830ed6bb2ae09b24ad221d20" } }]
+wheels = [{ url = "https://packages.redhat.com/api/pulp-content/public-rhai/cpu-torch2.13-el9.8-test/urllib3-2.8.0-1-py3-none-any.whl", upload-time = 2026-09-25T17:10:50Z, size = 137396, hashes = { sha256 = "82ee533e8a49f8239e310d9926b4330470208f844e7a0fa6e1da2001185cc1b7" } }]
 
 [[packages]]
 name = "uv"
